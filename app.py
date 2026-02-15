@@ -333,7 +333,7 @@ st.caption("ORCID → DOI → Crossref (citações) + Event Data (menções por 
 with st.expander("Descrição metodológica", expanded=False):
     st.markdown(
         """
-Aplicativo desenvolvido por Danielle Pompeu Noronha Pontes, Célia Simonetti Barbalo, Mateus e Raquel
+Aplicativo desenvolvido por Danielle Pompeu Noronha Pontes comcolaborção de Célia Regina Simonetti Barbalho, Mateus Rebouças Nascimento e Raquel Santos Maciel
 
 O **Extrator ORCID Crossref** é um aplicativo web que automatiza a coleta e o enriquecimento de informações sobre produções científicas a partir de uma **lista de ORCIDs** (enviada em Excel) e de um **e-mail institucional** (parâmetro *mailto*). A aplicação consulta a **ORCID Public API** para recuperar os *works* dos pesquisadores e identificar **DOIs**; em seguida, utiliza a **Crossref REST API** para obter metadados e indicadores bibliométricos (como contagem de citações na cobertura Crossref) e a **Crossref Event Data** para contabilizar **menções online por fonte** (altmetria). Ao final, o sistema consolida os resultados em um **arquivo Excel (.xlsx)** com uma aba única (“dados”), pronto para download e posterior análise bibliométrica e altmétrica.
 
@@ -432,5 +432,6 @@ if run:
 
     with st.expander("Log completo", expanded=False):
         st.code("\n".join(logs), language="text")
+
 
 
