@@ -68,7 +68,6 @@ def ler_orcids_do_excel(uploaded_file) -> list[str]:
     """
     df_orcids = pd.read_excel(uploaded_file)
 
-    # tenta achar coluna "orcid" (ignorando maiúsculas/minúsculas e espaços)
     col_map = {c: str(c).strip().lower() for c in df_orcids.columns}
     col_orcid = None
     for original, low in col_map.items():
@@ -126,13 +125,11 @@ def extrair_doi_do_work_orcid(work_detail: dict):
     """Extrai DOI dos external-ids do work do ORCID."""
     ext_ids = (work_detail.get("external-ids") or {}).get("external-id", [])
 
-    # 1) Prioriza external-id-type == doi
     for eid in ext_ids:
         if (eid.get("external-id-type") or "").lower() == "doi":
             valor = (eid.get("external-id-value") or "").strip()
             return extrair_doi_de_texto(valor) or (valor or None)
 
-    # 2) Fallback: tenta extrair DOI de qualquer ID
     for eid in ext_ids:
         valor = (eid.get("external-id-value") or "").strip()
         doi = extrair_doi_de_texto(valor)
@@ -146,10 +143,6 @@ def extrair_doi_do_work_orcid(work_detail: dict):
 # 4) Crossref (bibliometria)
 # =========================
 def crossref_por_doi(doi: str, email: str) -> dict:
-    """
-    Consulta Crossref /works/{doi} e retorna contagens/metadados úteis.
-    - is-referenced-by-count = nº de citações recebidas (na cobertura Crossref)
-    """
     url = f"{CROSSREF_WORKS_API}/{doi}"
     params = {"mailto": email} if email else {}
     data = get_json(url, params=params)
@@ -167,13 +160,7 @@ def crossref_por_doi(doi: str, email: str) -> dict:
 # =========================
 # 5) Event Data (altmetria) — por fonte
 # =========================
-def eventdata_por_doi(doi: str, email: str, rows: int = 1000, max_pages: int = 50) -> dict:
-    """
-    Consulta Event Data para um DOI e devolve SOMENTE contagem por fonte:
-      - Sempre cria colunas fixas: eventdata_source_<fonte> (mesmo com 0)
-      - Também adiciona colunas extras para fontes não previstas em FONTES_FIXAS
-      - Não retorna totalizações
-    """
+def eventdata_por_doi(doi: str, email: str, rows: int = EVENTDATA_ROWS, max_pages: int = EVENTDATA_MAX_PAGES) -> dict:
     contagem_por_fonte = {}
     cursor = None
     page = 0
@@ -210,10 +197,8 @@ def eventdata_por_doi(doi: str, email: str, rows: int = 1000, max_pages: int = 5
         cursor = next_cursor
         time.sleep(SLEEP_SECONDS)
 
-    # 1) Colunas fixas sempre presentes
     out = {f"eventdata_source_{s}": int(contagem_por_fonte.get(s, 0)) for s in FONTES_FIXAS}
 
-    # 2) Colunas extras (todas as outras fontes que aparecerem)
     for fonte, cont in contagem_por_fonte.items():
         col = f"eventdata_source_{fonte}"
         if col not in out:
@@ -228,19 +213,9 @@ def eventdata_por_doi(doi: str, email: str, rows: int = 1000, max_pages: int = 5
 def coletar_para_lista_orcids(
     orcids: list[str],
     email: str,
-    rows_eventdata: int,
-    max_pages_eventdata: int,
-    sleep_seconds: float,
     logger=None,
     progress_cb=None,
 ) -> pd.DataFrame:
-    """
-    Para cada ORCID:
-      - lista works
-      - extrai DOI
-      - consulta Crossref e Event Data (por fonte)
-    Retorna DataFrame consolidado.
-    """
     linhas = []
     total_orcids = len(orcids)
 
@@ -251,7 +226,7 @@ def coletar_para_lista_orcids(
             logger(f"[ORCID {idx_orcid}/{total_orcids}] {orcid}")
 
         try:
-            time.sleep(sleep_seconds)
+            time.sleep(SLEEP_SECONDS)
             works = listar_works_orcid(orcid)
             if logger:
                 logger(f"  - Works no ORCID: {len(works)}")
@@ -269,7 +244,7 @@ def coletar_para_lista_orcids(
 
             doi = None
             try:
-                time.sleep(sleep_seconds)
+                time.sleep(SLEEP_SECONDS)
                 detail = detalhes_work_orcid(orcid, put_code)
                 doi = extrair_doi_do_work_orcid(detail)
             except Exception:
@@ -286,9 +261,8 @@ def coletar_para_lista_orcids(
             }
 
             if doi:
-                # Crossref
                 try:
-                    time.sleep(sleep_seconds)
+                    time.sleep(SLEEP_SECONDS)
                     linha.update(crossref_por_doi(doi, email))
                 except Exception:
                     linha.update({
@@ -299,10 +273,9 @@ def coletar_para_lista_orcids(
                         "crossref_issued_year": None,
                     })
 
-                # Event Data
                 try:
-                    time.sleep(sleep_seconds)
-                    linha.update(eventdata_por_doi(doi, email, rows=rows_eventdata, max_pages=max_pages_eventdata))
+                    time.sleep(SLEEP_SECONDS)
+                    linha.update(eventdata_por_doi(doi, email))
                 except Exception:
                     for s in FONTES_FIXAS:
                         linha[f"eventdata_source_{s}"] = 0
@@ -390,15 +363,6 @@ with st.expander("Formato do Excel esperado", expanded=False):
         """.strip()
     )
 
-st.subheader("Parâmetros (opcional)")
-col1, col2, col3 = st.columns(3)
-with col1:
-    sleep_seconds = st.number_input("Pausa entre requisições (s)", min_value=0.0, max_value=5.0, value=SLEEP_SECONDS, step=0.05)
-with col2:
-    rows_eventdata = st.number_input("Event Data: rows", min_value=100, max_value=2000, value=EVENTDATA_ROWS, step=100)
-with col3:
-    max_pages_eventdata = st.number_input("Event Data: max pages", min_value=1, max_value=200, value=EVENTDATA_MAX_PAGES, step=5)
-
 run = st.button("Executar extração", type="primary", use_container_width=True)
 
 st.divider()
@@ -429,7 +393,6 @@ if run:
 
     def logger(msg: str):
         logs.append(msg)
-        # Mostra os últimos ~40 logs para manter a UI limpa
         log_box.code("\n".join(logs[-40:]), language="text")
 
     def progress_cb(p: float):
@@ -439,9 +402,6 @@ if run:
         df = coletar_para_lista_orcids(
             orcids=orcids,
             email=email.strip(),
-            rows_eventdata=int(rows_eventdata),
-            max_pages_eventdata=int(max_pages_eventdata),
-            sleep_seconds=float(sleep_seconds),
             logger=logger,
             progress_cb=progress_cb,
         )
