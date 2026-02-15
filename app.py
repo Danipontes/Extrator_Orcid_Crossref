@@ -327,7 +327,7 @@ st.set_page_config(
     layout="centered",
 )
 
-st.title("Extrator_ORCID_Crossref")
+st.title("Extrator ORCID Crossref")
 st.caption("ORCID → DOI → Crossref (citações) + Event Data (menções por fonte) → Excel")
 
 with st.expander("Descrição metodológica", expanded=False):
@@ -335,7 +335,7 @@ with st.expander("Descrição metodológica", expanded=False):
         """
 Aplicativo desenvolvido por Danielle Pompeu Noronha Pontes, Célia Simonetti Barbalo, Mateus e Raquel
 
-O **Extrator_ORCID_Crossref** é um aplicativo web que automatiza a coleta e o enriquecimento de informações sobre produções científicas a partir de uma **lista de ORCIDs** (enviada em Excel) e de um **e-mail institucional** (parâmetro *mailto*). A aplicação consulta a **ORCID Public API** para recuperar os *works* dos pesquisadores e identificar **DOIs**; em seguida, utiliza a **Crossref REST API** para obter metadados e indicadores bibliométricos (como contagem de citações na cobertura Crossref) e a **Crossref Event Data** para contabilizar **menções online por fonte** (altmetria). Ao final, o sistema consolida os resultados em um **arquivo Excel (.xlsx)** com uma aba única (“dados”), pronto para download e posterior análise bibliométrica e altmétrica.
+O **Extrator ORCID Crossref** é um aplicativo web que automatiza a coleta e o enriquecimento de informações sobre produções científicas a partir de uma **lista de ORCIDs** (enviada em Excel) e de um **e-mail institucional** (parâmetro *mailto*). A aplicação consulta a **ORCID Public API** para recuperar os *works* dos pesquisadores e identificar **DOIs**; em seguida, utiliza a **Crossref REST API** para obter metadados e indicadores bibliométricos (como contagem de citações na cobertura Crossref) e a **Crossref Event Data** para contabilizar **menções online por fonte** (altmetria). Ao final, o sistema consolida os resultados em um **arquivo Excel (.xlsx)** com uma aba única (“dados”), pronto para download e posterior análise bibliométrica e altmétrica.
 
 Em resumo este aplicativo implementa um pipeline de coleta baseado em APIs públicas:
 - **ORCID**: lista *works* por pesquisador e identifica DOIs (quando disponíveis);
@@ -432,4 +432,5 @@ if run:
 
     with st.expander("Log completo", expanded=False):
         st.code("\n".join(logs), language="text")
+
 
