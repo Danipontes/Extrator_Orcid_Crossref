@@ -433,6 +433,27 @@ if run:
     with st.expander("Log completo", expanded=False):
         st.code("\n".join(logs), language="text")
 
+st.markdown("---")
+
+with st.expander("📚 Como citar este software"):
+    st.markdown("""
+    **PONTES, D.; NASCIMENTO, M. R.; MACIEL, R. S.; BARBALHO, C. S.**  
+    ORCID-Extractor Acadêmico: ferramenta para enriquecimento automatizado de dados científicos via ORCID. Zenodo, 2026.  
+    DOI: https://doi.org/10.5281/zenodo.18652894
+    """)
+
+    st.markdown("#### 📌 BibTeX")
+    st.code("""
+@software{pontes2026orcid,
+  author       = {Pontes, Danielle and Nascimento, Mateus Rebouças and Maciel, Raquel Santos and Barbalho, Célia Simonetti},
+  title        = {ORCID-Extractor Acadêmico},
+  year         = {2026},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.18652894},
+  url          = {https://doi.org/10.5281/zenodo.18652894}
+}
+""", language="bibtex")
+
 
 
 
