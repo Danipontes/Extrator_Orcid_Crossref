@@ -438,7 +438,7 @@ st.markdown("---")
 with st.expander("📚 Como citar este software"):
     st.markdown("""
     **PONTES, D.; NASCIMENTO, M. R.; MACIEL, R. S.; BARBALHO, C. S.**  
-    ORCID-Extractor Acadêmico: ferramenta para enriquecimento automatizado de dados científicos via ORCID. Zenodo, 2026.  
+    Extrator_Orcid_Crossref: ferramenta acadêmica para recuperação automatizada de dados científicos via ORCID e Crossref. Zenodo, 2026.  
     DOI: https://doi.org/10.5281/zenodo.18652894
     """)
 
@@ -453,6 +453,7 @@ with st.expander("📚 Como citar este software"):
   url          = {https://doi.org/10.5281/zenodo.18652894}
 }
 """, language="bibtex")
+
 
 
 
